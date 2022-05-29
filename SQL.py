@@ -1,8 +1,7 @@
 import csv
 import json
-from unicodedata import digit
+
 from blist import sorteddict
-from sqlalchemy import false
 
 KEYWORDS = ("SELECT","FROM","WHERE","ORDER","BY","ASC","DSC","INSERT","INTO","VALUES","DELETE")
 OPERATORS = ("=","!=","<",">","<=",">=","!<","!>")
