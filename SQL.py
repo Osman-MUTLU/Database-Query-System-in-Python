@@ -2,6 +2,7 @@ import csv
 import json
 
 from blist import sorteddict
+from sympy import primitive
 
 KEYWORDS = ("SELECT","FROM","WHERE","ORDER","BY","ASC","DSC","INSERT","INTO","VALUES","DELETE")
 OPERATORS = ("=","!=","<",">","<=",">=","!<","!>")
@@ -23,16 +24,18 @@ RULES = (
    [10,1,"#",2,"#","opr","#"],
    ["R10","log","#","opr","#"]
 )
+# select name from students
+table_name = ""
 
 
 data = sorteddict()
+
 result = {}
 
 
 def read_csv(csvFile):
     global data,COLUMNS
      # data's keys is index, value is dict = {"row": value,.....}
-    
     with open(csvFile, encoding='utf-8') as csvf:
         csvReader = csv.DictReader(csvf)
         
@@ -56,10 +59,10 @@ def read_csv(csvFile):
             values = rows[columns_str].split(";")  
             column_dict = sorteddict(zip(COLUMNS.keys(),values))
             data[i] = column_dict
-        print(COLUMNS)
             
 
 def isValid(query):
+    global table_name
     query_valid_list = list()
     query.replace("("," ")
     query.replace(")","")
@@ -73,11 +76,14 @@ def isValid(query):
             
         if item.upper() in KEYWORDS:
             query_valid_list.append(KEYWORDS.index(item.upper()))
+            if item.upper() == "FROM":
+                table_name=arr[i+1]
+                
         elif item in OPERATORS:
             next_type = ""
             if i<len(arr):
                 flag = True
-                for char in arr[i+1]:
+                for char in arr[i+1]: 
                     if not char in DIGITS:
                         flag = False
                 if flag:
@@ -96,10 +102,14 @@ def isValid(query):
         elif item.upper() in LOGIC_OPRS:
             query_valid_list.append("log")
         else:
+            
             query_valid_list.append("#")
     if not query_valid_list in RULES:
         return False
     return True
+
+
+
 def create_json(jsonFile):
     '''
     tempdata = {}
@@ -112,16 +122,22 @@ def create_json(jsonFile):
        jsonf.write(json.dumps(result, indent=4))
 
 def main():
-    csvFile= r'students.csv'
-    jsonFile= r'students.json'
-    
-    #read_csv(csvFile)
-    
     query=input("Query: ")
     if isValid(query):
-        print(True)
+        try:
+            csvFile= r'{}.csv'.format(table_name)
+            jsonFile= r'{}.json'.format(table_name)
+            read_csv(csvFile)
+            
+            
+        except:
+            print("Error: Table is not found !!!")
     
-    #create_json(jsonFile)
+    #print(COLUMNS)
+    '''
+    for key in data.keys():
+        result[key] = dict(data[key])
+    create_json(jsonFile)'''
 
 if __name__ == '__main__':
     main()
